@@ -24,7 +24,6 @@ class SearchResultRequest {
 class TransactionResult
 
 class SerpService {
-    - external_api_credentials : ExternalApiCredentials
     + List<SearchResult> search_with_ebay(str keyword)
 }
 
