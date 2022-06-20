@@ -1,12 +1,27 @@
 @startuml "Help us Class Diagram"
 title "Help us Class Diagram"
 
-class ExternalApiCredentials {
-    + directus_api_url : str
-    + directus_api_key : str
-    + square_api_url : str
-    + ebay_search_endpoint : str
+class ObtainTokenResponse {
+    + access_token : str
+    + merchant_id : str
+    + refresh_token : str
+    + short_lived : bool
 }
+
+class ObtainTokenRequest {
+    + grant_type : str
+    + client_id : str
+    + client_secret : str
+    + scopes : list
+    + code : str
+}
+
+class SearchResultRequest {
+    + authorizationCode : str
+    + List<SearchResult> search_results
+}
+
+class TransactionResult
 
 class SerpService {
     - external_api_credentials : ExternalApiCredentials
@@ -14,13 +29,12 @@ class SerpService {
 }
 
 class PaymentService {
-    - external_api_credentials : ExternalApiCredentials
-    + charge_with_square(List<SearchResult> search_results) : str
+    + authorize_with_square(str authorizationCode) : TransactionResult
+    + checkout_with_square(SearchResultRequest search_results_request) : str
 }
 
 class BackendService {
-    - external_api_credentials : ExternalApiCredentials
-    + save_payment_result(List<SearchResult> search_results)   -
+    + save_payment_result(TransactionResult result) : bool
 }
 
 class SearchResult {
@@ -41,7 +55,8 @@ class SearchController {
 
 class PaymentController {
     - payment_service : PaymentService
-    + pay_with_square(List<SearchResult> search_results) : str
+    + checkout_with_square(SearchResultRequest search_results_request) : str
+    + callback_with_square(TransactionResult result) : bool
 }
 
 class LambdaHandler {
@@ -54,6 +69,14 @@ SearchController ..> SerpService : Uses
 PaymentController ..> PaymentService : Uses
 
 PaymentController ..> BackendService : Uses
+
+PaymentService ..> ObtainTokenResponse : Uses
+
+PaymentService ..> ObtainTokenRequest : Uses
+
+PaymentService ..> TransactionResult : Uses
+
+PaymentService ..> SearchResultRequest : Uses
 
 LambdaHandler ..> PaymentController : Uses
 
