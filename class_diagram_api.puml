@@ -1,0 +1,56 @@
+@startuml "help us Class Diagram"
+title "help us Class Diagram"
+
+class ExternalApiCredentials {
+    + directus_api_url : str
+    + directus_api_key : str
+    + square_api_url : str
+    + ebay_search_endpoint : str
+}
+
+class SerpService {
+    + search_with_ebay(str keyword) : List<SearchResult> 
+}
+
+class PaymentService {
+    + charge_with_square(List<SearchResult> search_results) : str
+}
+
+class SearchResult {
+    + title : str
+    + link : str
+    + condition : str
+    + price : str
+    + shipping : str
+    + extensions : List<str>
+    + thumbnail : str
+    
+}
+
+class SearchController {
+    + search_with_ebay(str keyword) : List<SearchResult>
+}
+
+class PaymentController {
+    + pay_with_square(List<SearchResult> search_results) : str
+}
+
+class LambdaHandler {
+    + handle(event, context) : dict
+}
+
+SerpService ..> SearchResult : Uses
+
+PaymentService ..> SearchResult : Uses
+
+SearchController ..> SerpService : Uses
+
+PaymentController ..> PaymentService : Uses
+
+LambdaHandler ..> PaymentController : Uses
+
+LambdaHandler ..> SearchController : Uses
+
+
+@enduml
+
