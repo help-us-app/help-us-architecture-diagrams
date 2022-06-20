@@ -34,7 +34,11 @@ donor -> help_us_app : user selects the charity they want to assist
 
 help_us_app -> api_lambda : the list of items the charity needs and price
 
-api_lambda -> boundary_square_api : the list of items the charity needs and price
+api_lambda -> boundary_square_api : the list of items the charity needs and price and makes the payment
+
+return OK
+
+api_lambda -> api_directus : makes callback to the directus api to update the database
 
 return OK
 
