@@ -1,5 +1,5 @@
-@startuml "help us Class Diagram"
-title "help us Class Diagram"
+@startuml "Help us Class Diagram"
+title "Help us Class Diagram"
 
 class ExternalApiCredentials {
     + directus_api_url : str
@@ -9,11 +9,18 @@ class ExternalApiCredentials {
 }
 
 class SerpService {
-    + search_with_ebay(str keyword) : List<SearchResult> 
+    - external_api_credentials : ExternalApiCredentials
+    + List<SearchResult> search_with_ebay(str keyword)
 }
 
 class PaymentService {
+    - external_api_credentials : ExternalApiCredentials
     + charge_with_square(List<SearchResult> search_results) : str
+}
+
+class BackendService {
+    - external_api_credentials : ExternalApiCredentials
+    + save_payment_result(List<SearchResult> search_results)   -
 }
 
 class SearchResult {
@@ -24,14 +31,16 @@ class SearchResult {
     + shipping : str
     + extensions : List<str>
     + thumbnail : str
-    
+
 }
 
 class SearchController {
+    - serp_service : SerpService
     + search_with_ebay(str keyword) : List<SearchResult>
 }
 
 class PaymentController {
+    - payment_service : PaymentService
     + pay_with_square(List<SearchResult> search_results) : str
 }
 
@@ -39,18 +48,16 @@ class LambdaHandler {
     + handle(event, context) : dict
 }
 
-SerpService ..> SearchResult : Uses
-
-PaymentService ..> SearchResult : Uses
 
 SearchController ..> SerpService : Uses
 
 PaymentController ..> PaymentService : Uses
 
+PaymentController ..> BackendService : Uses
+
 LambdaHandler ..> PaymentController : Uses
 
 LambdaHandler ..> SearchController : Uses
-
 
 @enduml
 
