@@ -1,5 +1,5 @@
-@startuml "Sequence Diagram for help us"
-title "Sequence Diagram for help us"
+@startuml "Sequence Diagram for help us (CHARITY)"
+title "Sequence Diagram for help us (CHARITY)"
 footer Page %page% of %lastpage%
 
 autonumber
