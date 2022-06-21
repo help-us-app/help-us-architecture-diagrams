@@ -18,13 +18,13 @@ class ObtainTokenRequest {
 
 class SearchResultRequest {
     + authorizationCode : str
-    + List<SearchResult> search_results
+    + List<SearchResultResponse> search_results
 }
 
 class TransactionResult
 
 class SerpService {
-    + List<SearchResult> search_with_ebay(str keyword)
+    + List<SearchResultResponse> search_with_ebay(str keyword)
 }
 
 class PaymentService {
@@ -36,7 +36,7 @@ class BackendService {
     + save_payment_result(TransactionResult result) : bool
 }
 
-class SearchResult {
+class SearchResultResponse {
     + title : str
     + link : str
     + condition : str
@@ -49,7 +49,7 @@ class SearchResult {
 
 class SearchController {
     - serp_service : SerpService
-    + search_with_ebay(str keyword) : List<SearchResult>
+    + search_with_ebay(str keyword) : List<SearchResultResponse>
 }
 
 class PaymentController {
