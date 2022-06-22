@@ -1,63 +1,199 @@
 @startuml "Help us Class Diagram"
 title "Help us Class Diagram"
 
-class ExternalApiCredentials {
-    + directus_api_url : str
-    + directus_api_key : str
-    + square_api_url : str
-    + ebay_search_endpoint : str
+class SquareAuthController {
+    + authorize(AuthorizeWithSquareCommand command)
+    + getAuthLink(GetAuthLinkCommand command)
 }
 
-class SerpService {
-    - external_api_credentials : ExternalApiCredentials
-    + List<SearchResult> search_with_ebay(str keyword)
+class AuthorizeWithSquareCommand {
+    + grant_type : string
+    + refresh_token : string
+    + code : string
+    + square_service : SquareService
+    + execute(self) : ObtainTokenResponse
 }
 
-class PaymentService {
-    - external_api_credentials : ExternalApiCredentials
-    + charge_with_square(List<SearchResult> search_results) : str
+class GetAuthLinkCommand {
+    + square_service : SquareService
+    + execute(self) : string
 }
 
-class BackendService {
-    - external_api_credentials : ExternalApiCredentials
-    + save_payment_result(List<SearchResult> search_results)   -
+SquareAuthController ..> AuthorizeWithSquareCommand : uses
+SquareAuthController ..> GetAuthLinkCommand : uses
+
+class SquareService {
+    + Variables : Variables
+    + Constants : Constants
+    + get_access_token(self, command) : str
+    + authorize_with_square(self, AuthorizeWithSquareCommand command) : ObtainTokenResponse
+    + checkout_with_square(self, CheckoutWithSquareCommand command) : CheckoutResponse
+    + update_with_square(self, UpdateWithSquareCommand command) : bool
+    + delete_link_square(self, DeleteLinkSquareCommand command) : bool
+    + get_payment_link(self, RetrieveWithSquareCommand command) : string
 }
 
-class SearchResult {
-    + title : str
-    + link : str
-    + condition : str
-    + price : str
-    + shipping : str
-    + extensions : List<str>
-    + thumbnail : str
-
+class ObtainTokenResponse {
+    + access_token : string
+    + merchant_id : string
+    + refresh_token : string
+    + short_lived : string
 }
 
-class SearchController {
-    - serp_service : SerpService
-    + search_with_ebay(str keyword) : List<SearchResult>
+class ObtainTokenRequest {
+    + grant_type : string
+    + refresh_token : string
+    + code : string
+    + short_lived : string
+    + client_id : string
+    + client_secret : string
+    + scopes : string
 }
 
-class PaymentController {
-    - payment_service : PaymentService
-    + pay_with_square(List<SearchResult> search_results) : str
+SquareService ..> ObtainTokenResponse : uses
+SquareService ..> ObtainTokenRequest : uses
+AuthorizeWithSquareCommand ..> SquareService : uses
+GetAuthLinkCommand ..> SquareService : uses
+
+class SquarePaymentController {
+    + create(CheckoutWithSquareCommand command)
+    + read(RetrieveWithSquareCommand command)
+    + update(UpdateWithSquareCommand command)
+    + delete(DeleteLinkSquareCommand command)
 }
 
-class LambdaHandler {
-    + handle(event, context) : dict
+class CheckoutWithSquareCommand {
+    + square_service : SquareService
+    + execute(self) : CheckoutResponse
 }
 
+class RetrieveWithSquareCommand {
+    + square_service : SquareService
+    + execute(self) : CheckoutResponse
+}
 
-SearchController ..> SerpService : Uses
+class UpdateWithSquareCommand {
+    + square_service : SquareService
+    + execute(self) : bool
+}
 
-PaymentController ..> PaymentService : Uses
+class DeleteLinkSquareCommand {
+    + square_service : SquareService
+    + execute(self) : bool
+}
 
-PaymentController ..> BackendService : Uses
+class CheckoutResponse {
+    + id : string
+    + created_at : string
+    + order_id : string
+    + url : string
+    + version : string
+}
 
-LambdaHandler ..> PaymentController : Uses
+'class CheckoutRequest:
+'    def __init__(self, request):
+'        self.order = Order(request['order'])
+'        self.source = request['source']
+'
+'    def to_dict(self):
+'        return {
+'            'order': self.order.to_dict()
+'        }
+'
+'
+'class Order:
+'    def __init__(self, request):
+'        self.customer_id = request['customer_id']
+'        self.location_id = request['location_id']
+'        self.line_items = [LineItem(item) for item in request['line_items']]
+'        self.payment_note = request['payment_note']
+'        self.pre_populated_data = PrePopulatedData(request['pre_populated_data'])
+'
+'    def to_dict(self):
+'        return {
+'            'customer_id': self.customer_id,
+'            'location_id': self.location_id,
+'            'line_items': [item.to_dict() for item in self.line_items],
+'            'payment_note': self.payment_note,
+'            'pre_populated_data': self.pre_populated_data.to_dict()
+'        }
+'
+'
+'class LineItem:
+'    def __init__(self, request):
+'        self.item_type = request['item_type']
+'        self.name = request['name']
+'        self.quantity = request['quantity']
+'        self.base_price_money = request['base_price_money']
+'
+'    def to_dict(self):
+'        return {
+'            'item_type': self.item_type,
+'            'name': self.name,
+'            'quantity': self.quantity,
+'            'base_price_money': self.base_price_money
+'        }
+'
+'
+'class PrePopulatedData:
+'    def __init__(self, request):
+'        self.buyer_email = request['buyer_email']
+'        self.buyer_phone_number = request['buyer_phone_number']
+'
+'    def to_dict(self):
+'        return {
+'            'buyer_email': self.buyer_email,
+'            'buyer_phone_number': self.buyer_phone_number
+'        }
+class  CheckoutRequest {
+    + order : Order
+    + source : string
+}
 
-LambdaHandler ..> SearchController : Uses
+class Order {
+    + customer_id : string
+    + location_id : string
+    + line_items : LineItem[]
+    + payment_note : string
+    + pre_populated_data : PrePopulatedData
+}
+
+class LineItem {
+    + item_type : string
+    + name : string
+    + quantity : int
+    + base_price_money : Money
+}
+
+class PrePopulatedData {
+    + buyer_email : string
+    + buyer_phone_number : string
+}
+
+class Money {
+    + amount : int
+    + currency : string
+}
+
+SquareService ..> CheckoutResponse : uses
+SquareService ..> CheckoutRequest : uses
+CheckoutRequest ..> Order : uses
+Order ..> LineItem : uses
+Order ..> PrePopulatedData : uses
+LineItem ..> Money : uses
+
+
+
+SquarePaymentController ..> CheckoutWithSquareCommand : uses
+SquarePaymentController ..> RetrieveWithSquareCommand : uses
+SquarePaymentController ..> UpdateWithSquareCommand : uses
+SquarePaymentController ..> DeleteLinkSquareCommand : uses
+
+CheckoutWithSquareCommand ..> SquareService : uses
+RetrieveWithSquareCommand ..> SquareService : uses
+UpdateWithSquareCommand ..> SquareService : uses
+DeleteLinkSquareCommand ..> SquareService : uses
+
 
 @enduml
 
