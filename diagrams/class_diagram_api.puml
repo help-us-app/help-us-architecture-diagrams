@@ -1,85 +1,144 @@
 @startuml "Help us Class Diagram"
 title "Help us Class Diagram"
 
+class SquareAuthController {
+    + authorize(AuthorizeWithSquareCommand command)
+    + getAuthLink(GetAuthLinkCommand command)
+}
+
+class AuthorizeWithSquareCommand {
+    + grant_type : string
+    + refresh_token : string
+    + code : string
+    + square_service : SquareService
+    + execute(self) : ObtainTokenResponse
+}
+
+class GetAuthLinkCommand {
+    + square_service : SquareService
+    + execute(self) : string
+}
+
+SquareAuthController ..> AuthorizeWithSquareCommand : uses
+SquareAuthController ..> GetAuthLinkCommand : uses
+
+class SquareService {
+    + Variables : Variables
+    + Constants : Constants
+    + get_access_token(self, command) : str
+    + authorize_with_square(self, AuthorizeWithSquareCommand command) : ObtainTokenResponse
+    + checkout_with_square(self, CheckoutWithSquareCommand command) : CheckoutResponse
+    + update_with_square(self, UpdateWithSquareCommand command) : bool
+    + delete_link_square(self, DeleteLinkSquareCommand command) : bool
+    + get_payment_link(self, RetrieveWithSquareCommand command) : string
+}
+
 class ObtainTokenResponse {
-    + access_token : str
-    + merchant_id : str
-    + refresh_token : str
-    + short_lived : bool
+    + access_token : string
+    + merchant_id : string
+    + refresh_token : string
+    + short_lived : string
 }
 
 class ObtainTokenRequest {
-    + grant_type : str
-    + client_id : str
-    + client_secret : str
-    + scopes : list
-    + code : str
+    + grant_type : string
+    + refresh_token : string
+    + code : string
+    + short_lived : string
+    + client_id : string
+    + client_secret : string
+    + scopes : string
 }
 
-class SearchResultRequest {
-    + authorizationCode : str
-    + List<SearchResultResponse> search_results
+SquareService ..> ObtainTokenResponse : uses
+SquareService ..> ObtainTokenRequest : uses
+AuthorizeWithSquareCommand ..> SquareService : uses
+GetAuthLinkCommand ..> SquareService : uses
+
+class SquarePaymentController {
+    + create(CheckoutWithSquareCommand command)
+    + read(RetrieveWithSquareCommand command)
+    + update(UpdateWithSquareCommand command)
+    + delete(DeleteLinkSquareCommand command)
 }
 
-class TransactionResult
-
-class SerpService {
-    + List<SearchResultResponse> search_with_ebay(str keyword)
+class CheckoutWithSquareCommand {
+    + square_service : SquareService
+    + execute(self) : CheckoutResponse
 }
 
-class PaymentService {
-    + authorize_with_square(str authorizationCode) : TransactionResult
-    + checkout_with_square(SearchResultRequest search_results_request) : str
+class RetrieveWithSquareCommand {
+    + square_service : SquareService
+    + execute(self) : CheckoutResponse
 }
 
-class BackendService {
-    + save_payment_result(TransactionResult result) : bool
+class UpdateWithSquareCommand {
+    + square_service : SquareService
+    + execute(self) : bool
 }
 
-class SearchResultResponse {
-    + title : str
-    + link : str
-    + condition : str
-    + price : str
-    + shipping : str
-    + extensions : List<str>
-    + thumbnail : str
-
+class DeleteLinkSquareCommand {
+    + square_service : SquareService
+    + execute(self) : bool
 }
 
-class SearchController {
-    - serp_service : SerpService
-    + search_with_ebay(str keyword) : List<SearchResultResponse>
+class CheckoutResponse {
+    + id : string
+    + created_at : string
+    + order_id : string
+    + url : string
+    + version : string
 }
 
-class PaymentController {
-    - payment_service : PaymentService
-    + checkout_with_square(SearchResultRequest search_results_request) : str
-    + callback_with_square(TransactionResult result) : bool
+class  CheckoutRequest {
+    + order : Order
+    + source : string
 }
 
-class LambdaHandler {
-    + handle(event, context) : dict
+class Order {
+    + customer_id : string
+    + location_id : string
+    + line_items : LineItem[]
+    + payment_note : string
+    + pre_populated_data : PrePopulatedData
 }
 
+class LineItem {
+    + item_type : string
+    + name : string
+    + quantity : int
+    + base_price_money : Money
+}
 
-SearchController ..> SerpService : Uses
+class PrePopulatedData {
+    + buyer_email : string
+    + buyer_phone_number : string
+}
 
-PaymentController ..> PaymentService : Uses
+class Money {
+    + amount : int
+    + currency : string
+}
 
-PaymentController ..> BackendService : Uses
+SquareService ..> CheckoutResponse : uses
+SquareService ..> CheckoutRequest : uses
+CheckoutRequest ..> Order : uses
+Order ..> LineItem : uses
+Order ..> PrePopulatedData : uses
+LineItem ..> Money : uses
 
-PaymentService ..> ObtainTokenResponse : Uses
 
-PaymentService ..> ObtainTokenRequest : Uses
 
-PaymentService ..> TransactionResult : Uses
+SquarePaymentController ..> CheckoutWithSquareCommand : uses
+SquarePaymentController ..> RetrieveWithSquareCommand : uses
+SquarePaymentController ..> UpdateWithSquareCommand : uses
+SquarePaymentController ..> DeleteLinkSquareCommand : uses
 
-PaymentService ..> SearchResultRequest : Uses
+CheckoutWithSquareCommand ..> SquareService : uses
+RetrieveWithSquareCommand ..> SquareService : uses
+UpdateWithSquareCommand ..> SquareService : uses
+DeleteLinkSquareCommand ..> SquareService : uses
 
-LambdaHandler ..> PaymentController : Uses
-
-LambdaHandler ..> SearchController : Uses
 
 @enduml
 

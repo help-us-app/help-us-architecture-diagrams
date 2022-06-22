@@ -1,0 +1,35 @@
+@startuml
+hide circle
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+entity "Merchant" as merchant {
+  *id : uuid
+  --
+  *name : string
+  access_token : string
+  refresh_token : string
+}
+
+entity "Location" as location {
+  *id : uuid
+  --
+  *name : string
+  *latitude : float
+  *longitude : float
+  *merchant_id : string
+  location_id : string
+}
+
+entity "Users" as users {
+  *id : uuid
+  --
+  *email : string
+  token : string
+  type : string
+}
+
+merchant ||..o{ location
+merchant ||..o{ users
+@enduml
