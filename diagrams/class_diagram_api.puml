@@ -7,6 +7,7 @@ skinparam linetype ortho
 class SquareAuthController {
     + authorize(AuthorizeWithSquareCommand command)
     + getAuthLink(GetAuthLinkCommand command)
+    + webhook(SetMerchantInfoWebHookCommand command)
 }
 
 class AuthorizeWithSquareCommand {
@@ -29,7 +30,9 @@ SquareAuthController ..> GetAuthLinkCommand : uses
 class SquareService {
     + Variables : Variables
     + Constants : Constants
+    + DirectusRepository : DirectusRepository
     + get_access_token(self, command) : str
+    + set_merchant_information_for_user(self, SetMerchantInfoWebHookCommand command) : None
     + get_square_auth_link(self, command) : str
     + authorize_with_square(self, AuthorizeWithSquareCommand command) : ObtainTokenResponse
     + checkout_with_square(self, CheckoutWithSquareCommand command) : CheckoutResponse
@@ -213,6 +216,32 @@ CreateCustomerSquareCommand ..> SquareService : uses
 DeleteCustomerSquareCommand ..> SquareService : uses
 SquareService ..> CreateCustomerRequest : uses
 
+
+class DirectusRepository {
+    + set_merchant_information_for_user(String user_id , MerchantInfo info)
+}
+
+class MerchantInfo {
+    + merchant_id : string
+    + access_token : string
+    + refresh_token : string
+    + expires_in : string
+}
+
+class SetMerchantInfoWebHookCommand {
+    + square_service : SquareService
+    + user_id : string
+    + merchant_id : string
+    + access_token : string
+    + refresh_token : string
+    + expires_in : string
+    + execute(self) : None
+}
+
+DirectusRepository ..> MerchantInfo : uses
+SquareService ..> DirectusRepository : uses
+SetMerchantInfoWebHookCommand ..> SquareService : uses
+SquareAuthController ..> SetMerchantInfoWebHookCommand : uses
 
 
 @enduml
