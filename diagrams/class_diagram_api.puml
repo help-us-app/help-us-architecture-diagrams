@@ -1,6 +1,9 @@
 @startuml "Help us Class Diagram"
 title "Help us Class Diagram"
 
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
 class SquareAuthController {
     + authorize(AuthorizeWithSquareCommand command)
     + getAuthLink(GetAuthLinkCommand command)
@@ -31,6 +34,8 @@ class SquareService {
     + update_with_square(self, UpdateWithSquareCommand command) : bool
     + delete_link_square(self, DeleteLinkSquareCommand command) : bool
     + get_payment_link(self, RetrieveWithSquareCommand command) : string
+    + list_locations(self, ListLocationsSquareCommand command) : LocationResponse
+    + update_location(self, UpdateLocationSquareCommand command) : bool
 }
 
 class ObtainTokenResponse {
@@ -139,6 +144,46 @@ RetrieveWithSquareCommand ..> SquareService : uses
 UpdateWithSquareCommand ..> SquareService : uses
 DeleteLinkSquareCommand ..> SquareService : uses
 
+class SquareLocationController {
+    + list_locations(ListLocationsSquareCommand command)
+    + update_location(UpdateLocationSquareCommand command)
+}
+
+class ListLocationsSquareCommand {
+    + square_service : SquareService
+    + execute(self) : LocationResponse
+}
+
+class UpdateLocationSquareCommand {
+    + square_service : SquareService
+    + execute(self) : bool
+}
+
+class LocationResponse {
+    + locations : Location[]
+}
+
+class Location {
+    + id : string
+    + name : string
+    + business_email : string
+    + logo_url : string
+    + merchant_id : string
+    + coordinates : Coordinates
+}
+
+class Coordinates {
+    + latitude : float
+    + longitude : float
+}
+
+SquareLocationController ..> ListLocationsSquareCommand : uses
+SquareLocationController ..> UpdateLocationSquareCommand : uses
+ListLocationsSquareCommand ..> SquareService : uses
+UpdateLocationSquareCommand ..> SquareService : uses
+SquareService ..> LocationResponse : uses
+LocationResponse ..> Location : uses
+Location ..> Coordinates : uses
 
 @enduml
 
