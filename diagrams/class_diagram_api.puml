@@ -19,6 +19,7 @@ class AuthorizeWithSquareCommand {
 
 class GetAuthLinkCommand {
     + square_service : SquareService
+    + user_id : string
     + execute(self) : string
 }
 
@@ -29,6 +30,7 @@ class SquareService {
     + Variables : Variables
     + Constants : Constants
     + get_access_token(self, command) : str
+    + get_square_auth_link(self, command) : str
     + authorize_with_square(self, AuthorizeWithSquareCommand command) : ObtainTokenResponse
     + checkout_with_square(self, CheckoutWithSquareCommand command) : CheckoutResponse
     + update_with_square(self, UpdateWithSquareCommand command) : bool
