@@ -7,6 +7,7 @@ skinparam linetype ortho
 class SquareAuthController {
     + authorize(AuthorizeWithSquareCommand command)
     + getAuthLink(GetAuthLinkCommand command)
+    + webhook(SetMerchantInfoWebHookCommand command)
 }
 
 class AuthorizeWithSquareCommand {
@@ -29,7 +30,9 @@ SquareAuthController ..> GetAuthLinkCommand : uses
 class SquareService {
     + Variables : Variables
     + Constants : Constants
+    + DirectusRepository : DirectusRepository
     + get_access_token(self, command) : str
+    + set_merchant_information_for_user(self, SetMerchantInfoWebHookCommand command) : None
     + get_square_auth_link(self, command) : str
     + authorize_with_square(self, AuthorizeWithSquareCommand command) : ObtainTokenResponse
     + checkout_with_square(self, CheckoutWithSquareCommand command) : CheckoutResponse
@@ -103,7 +106,6 @@ class  CheckoutRequest {
 }
 
 class Order {
-    + customer_id : string
     + location_id : string
     + line_items : LineItem[]
     + payment_note : string
@@ -187,32 +189,31 @@ SquareService ..> LocationResponse : uses
 LocationResponse ..> Location : uses
 Location ..> Coordinates : uses
 
-class SquareCustomerController {
-    + create(CreateCustomerSquareCommand command)
-    + delete(DeleteCustomerSquareCommand command,customer_id)
+class DirectusRepository {
+    + set_merchant_information_for_user(String user_id , MerchantInfo info)
 }
 
-class CreateCustomerSquareCommand {
+class MerchantInfo {
+    + merchant_id : string
+    + access_token : string
+    + refresh_token : string
+    + expires_in : string
+}
+
+class SetMerchantInfoWebHookCommand {
     + square_service : SquareService
-    + execute(self) : bool
+    + user_id : string
+    + merchant_id : string
+    + access_token : string
+    + refresh_token : string
+    + expires_in : string
+    + execute(self) : None
 }
 
-class DeleteCustomerSquareCommand {
-    + square_service : SquareService
-    + execute(self) : bool
-}
-
-class CreateCustomerRequest {
-    + company_name : string
-    + email_address : string
-}
-
-SquareCustomerController ..> CreateCustomerSquareCommand : uses
-SquareCustomerController ..> DeleteCustomerSquareCommand : uses
-CreateCustomerSquareCommand ..> SquareService : uses
-DeleteCustomerSquareCommand ..> SquareService : uses
-SquareService ..> CreateCustomerRequest : uses
-
+DirectusRepository ..> MerchantInfo : uses
+SquareService ..> DirectusRepository : uses
+SetMerchantInfoWebHookCommand ..> SquareService : uses
+SquareAuthController ..> SetMerchantInfoWebHookCommand : uses
 
 
 @enduml
