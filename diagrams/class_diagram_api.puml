@@ -106,7 +106,6 @@ class  CheckoutRequest {
 }
 
 class Order {
-    + customer_id : string
     + location_id : string
     + line_items : LineItem[]
     + payment_note : string
@@ -189,33 +188,6 @@ UpdateLocationSquareCommand ..> SquareService : uses
 SquareService ..> LocationResponse : uses
 LocationResponse ..> Location : uses
 Location ..> Coordinates : uses
-
-class SquareCustomerController {
-    + create(CreateCustomerSquareCommand command)
-    + delete(DeleteCustomerSquareCommand command,customer_id)
-}
-
-class CreateCustomerSquareCommand {
-    + square_service : SquareService
-    + execute(self) : bool
-}
-
-class DeleteCustomerSquareCommand {
-    + square_service : SquareService
-    + execute(self) : bool
-}
-
-class CreateCustomerRequest {
-    + company_name : string
-    + email_address : string
-}
-
-SquareCustomerController ..> CreateCustomerSquareCommand : uses
-SquareCustomerController ..> DeleteCustomerSquareCommand : uses
-CreateCustomerSquareCommand ..> SquareService : uses
-DeleteCustomerSquareCommand ..> SquareService : uses
-SquareService ..> CreateCustomerRequest : uses
-
 
 class DirectusRepository {
     + set_merchant_information_for_user(String user_id , MerchantInfo info)
