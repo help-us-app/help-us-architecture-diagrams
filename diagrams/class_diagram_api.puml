@@ -215,6 +215,39 @@ SquareService ..> DirectusRepository : uses
 SetMerchantInfoWebHookCommand ..> SquareService : uses
 SquareAuthController ..> SetMerchantInfoWebHookCommand : uses
 
+class SerpController {
+    + search(SearchSerpCommand command)
+}
+
+class SearchSerpCommand {
+    + serp_service : SerpService
+    + execute(self) : SerpResponse
+}
+
+class SerpService {
+    + Variables : Variables
+    + Constants : Constants
+    + DirectusRepository : DirectusRepository
+    + search(self, SearchSerpCommand command) : SearchResponse
+}
+
+class SearchResponse {
+    + title : string
+    + description : string
+    + thumbnail : string
+    + rating : float
+    + reviews : int
+    + special_offer_text : string
+    + seller_name : string
+    + two_day_shipping : bool
+    + sponsored : bool
+    + quantity : int
+    + product_page_url : string
+}
+
+SerpController ..> SearchSerpCommand : uses
+SearchSerpCommand ..> SerpService : uses
+SerpService ..> SearchResponse : uses
 
 @enduml
 
