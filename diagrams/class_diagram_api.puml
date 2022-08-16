@@ -40,7 +40,7 @@ class SquareService {
     + delete_link_square(self, DeleteLinkSquareCommand command) : bool
     + get_payment_link(self, RetrieveWithSquareCommand command) : string
     + list_locations(self, ListLocationsSquareCommand command) : LocationResponse
-    + update_location(self, UpdateLocationSquareCommand command) : bool
+    + get_location_information(self, RetrieveLocationSquareCommand command) : bool
 }
 
 class ObtainTokenResponse {
@@ -93,48 +93,19 @@ class DeleteLinkSquareCommand {
 }
 
 class CheckoutResponse {
-    + id : string
-    + created_at : string
-    + order_id : string
-    + url : string
-    + version : string
+    + payment_link : PaymentLink
 }
 
-class  CheckoutRequest {
+class  CheckoutRequest{
     + order : Order
     + source : string
-}
-
-class Order {
-    + location_id : string
-    + line_items : LineItem[]
     + payment_note : string
-    + pre_populated_data : PrePopulatedData
-}
-
-class LineItem {
-    + item_type : string
-    + name : string
-    + quantity : int
-    + base_price_money : Money
-}
-
-class PrePopulatedData {
-    + buyer_email : string
-    + buyer_phone_number : string
-}
-
-class Money {
-    + amount : int
-    + currency : string
-}
+    + checkout_options : CheckoutOptions
+    }
 
 SquareService ..> CheckoutResponse : uses
 SquareService ..> CheckoutRequest : uses
-CheckoutRequest ..> Order : uses
-Order ..> LineItem : uses
-Order ..> PrePopulatedData : uses
-LineItem ..> Money : uses
+
 
 
 
@@ -150,7 +121,7 @@ DeleteLinkSquareCommand ..> SquareService : uses
 
 class SquareLocationController {
     + list_locations(ListLocationsSquareCommand command)
-    + update_location(UpdateLocationSquareCommand command)
+    + get_location_information(RetrieveLocationSquareCommand command)
 }
 
 class ListLocationsSquareCommand {
@@ -158,39 +129,26 @@ class ListLocationsSquareCommand {
     + execute(self) : LocationResponse
 }
 
-class UpdateLocationSquareCommand {
+class RetrieveLocationSquareCommand {
     + square_service : SquareService
     + execute(self) : bool
 }
 
 class LocationResponse {
-    + locations : Location[]
+    + location : Location
 }
 
-class Location {
-    + id : string
-    + name : string
-    + business_email : string
-    + logo_url : string
-    + merchant_id : string
-    + coordinates : Coordinates
-}
-
-class Coordinates {
-    + latitude : float
-    + longitude : float
-}
 
 SquareLocationController ..> ListLocationsSquareCommand : uses
-SquareLocationController ..> UpdateLocationSquareCommand : uses
+SquareLocationController ..> RetrieveLocationSquareCommand : uses
 ListLocationsSquareCommand ..> SquareService : uses
-UpdateLocationSquareCommand ..> SquareService : uses
+RetrieveLocationSquareCommand ..> SquareService : uses
 SquareService ..> LocationResponse : uses
-LocationResponse ..> Location : uses
-Location ..> Coordinates : uses
 
 class DirectusRepository {
     + set_merchant_information_for_user(String user_id , MerchantInfo info)
+    + get_user_by_id(String user_id)
+    + update_items_status_to_complete(List<String> items_ids, String buyer_email)
 }
 
 class MerchantInfo {
@@ -215,39 +173,16 @@ SquareService ..> DirectusRepository : uses
 SetMerchantInfoWebHookCommand ..> SquareService : uses
 SquareAuthController ..> SetMerchantInfoWebHookCommand : uses
 
-class SerpController {
-    + search(SearchSerpCommand command)
-}
 
-class SearchSerpCommand {
-    + serp_service : SerpService
-    + execute(self) : SerpResponse
+class Scraper {
+    - cart_type : string
+    - body : string
+    - Constants : Constants
+    + scrape_body()
+    + scrape_amazon()
+    + scrape_ebay()
+    + scrape_target()
 }
-
-class SerpService {
-    + Variables : Variables
-    + Constants : Constants
-    + DirectusRepository : DirectusRepository
-    + search(self, SearchSerpCommand command) : SearchResponse
-}
-
-class SearchResponse {
-    + title : string
-    + description : string
-    + thumbnail : string
-    + rating : float
-    + reviews : int
-    + special_offer_text : string
-    + seller_name : string
-    + two_day_shipping : bool
-    + sponsored : bool
-    + quantity : int
-    + product_page_url : string
-}
-
-SerpController ..> SearchSerpCommand : uses
-SearchSerpCommand ..> SerpService : uses
-SerpService ..> SearchResponse : uses
 
 @enduml
 
