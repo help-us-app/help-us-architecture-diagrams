@@ -4,33 +4,40 @@ hide circle
 ' avoid problems with angled crows feet
 skinparam linetype ortho
 
-entity "Merchant" as merchant {
-  *id : uuid
-  --
-  *name : string
-  customer_id : string
-  access_token : string
-  refresh_token : string
-}
-
-entity "Location" as location {
-  *id : uuid
-  --
-  *name : string
-  latitude : float
-  longitude : float
-  merchant_id : string
-  location_id : string
-}
-
 entity "Users" as users {
   *id : uuid
   --
-  *email : string
-  token : string
-  type : string
+  location_id : string
+  merchant_id : string
+  authorization_code : string
+  access_token : string
+  refresh_token : string
+  expires_in : int
 }
 
-merchant ||..o{ location
-merchant ||..o{ users
+entity "Campaigns" as campaigns {
+  *id : uuid
+  --
+  name : string
+  image : string
+  completed_image : string
+  description : string
+  location_id : string
+  is_completed : boolean
+}
+
+entity "Items" as items {
+  *id : uuid
+  --
+  title : string
+  link : string
+  purchased : boolean
+  thumbnail : string
+  price : string
+  campaign_id : string
+  bought_by : string
+}
+
+users ||..o{ campaigns
+campaigns ||..o{ items
 @enduml
