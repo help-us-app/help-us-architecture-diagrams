@@ -1,0 +1,38 @@
+@startuml "Sequence Diagram for help us (Non-profits)"
+title "Sequence Diagram for help us (Non-profits)"
+footer Page %page% of %lastpage%
+
+autonumber
+autoactivate on
+
+actor "Non Profit" as non_profit
+
+participant "help us for Chrome" as help_us_for_chrome
+
+participant "AWS Lambda Function" as api_lambda
+
+database "Campaign: Database" as db_campaigns
+
+database "Items: Database" as db_items
+
+non_profit -> help_us_for_chrome #008037 : user clicks on the "make a wishlist" button on a supported site.
+
+help_us_for_chrome -> api_lambda #008037 : the scraped webpage of the cart is sent to the API.
+
+return the list of items from the webpage is returned to the API.
+
+return the list of items from the webpage.
+
+non_profit -> help_us_for_chrome : user enters the details (name, description, image) of the wishlist campaign.
+
+help_us_for_chrome -> db_campaigns : the campaign is saved in the database.
+
+return OK
+
+help_us_for_chrome -> db_items : the items are saved in the database.
+
+return OK
+
+return success
+
+@enduml
